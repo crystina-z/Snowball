@@ -65,7 +65,8 @@ class Reverb(object):
         limit = len(tags)-1
 
         while i <= limit:
-            tmp = StringIO.StringIO()
+            # tmp = StringIO.StringIO()
+            tmp = StringIO()
             tmp_tags = []
 
             # a ReVerb pattern always starts with a verb
@@ -224,7 +225,8 @@ class Reverb(object):
         # match is chosen.
 
         while i <= limit:
-            tmp = StringIO.StringIO()
+            # tmp = StringIO.StringIO()
+            tmp = StringIO()
             tmp_tags = []
 
             # a ReVerb pattern always starts with a verb

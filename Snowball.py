@@ -28,7 +28,7 @@ class Snowball(object):
         self.patterns = list()
         self.processed_tuples = list()
         self.candidate_tuples = defaultdict(list)
-        self.config = Config.Config(config_file, seeds_file, negative_seeds, sentences_file, similarity, confidance)
+        self.config = Config(config_file, seeds_file, negative_seeds, sentences_file, similarity, confidance)
 
     def generate_tuples(self, sentences_file):
         """
@@ -141,6 +141,8 @@ class Snowball(object):
 
                     if sim_best >= self.config.threshold_similarity:
                         # if this instance was already extracted, check if it was by this extraction pattern
+                        # import pdb
+                        # pdb.set_trace()
                         patterns = self.candidate_tuples[t]
                         if patterns is not None:
                             if pattern_best not in [x[0] for x in patterns]:
@@ -190,12 +192,13 @@ class Snowball(object):
                     # use past confidence values to calculate new confidence
                     # if parameter Wupdt < 0.5 the system trusts new examples less on each iteration
                     # which will lead to more conservative patterns and have a damping effect.
-                    if iter > 0:
+                    # if iter > 0:
+                    if i > 0:
                         t.confidence = t.confidence * self.config.wUpdt + t.confidence_old * (1 - self.config.wUpdt)
 
                 # update seed set of tuples to use in next iteration
                 # seeds = { T | Conf(T) > min_tuple_confidence }
-                if i+1 < self.config.number_iterations:
+                if i + 1 < self.config.number_iterations:
                     print("Adding tuples to seed with confidence =>" + str(self.config.instance_confidance))
                     for t in self.candidate_tuples.keys():
                         if t.confidence >= self.config.instance_confidance:
@@ -209,8 +212,13 @@ class Snowball(object):
         f_output = open("relationships.txt", "w")
         tmp = sorted(self.candidate_tuples, key=lambda tpl: tpl.confidence, reverse=True)
         for t in tmp:
-            f_output.write("instance: "+t.e1.encode("utf8")+'\t'+t.e2.encode("utf8")+'\tscore:'+str(t.confidence)+'\n')
-            f_output.write("sentence: "+t.sentence.encode("utf8")+'\n')
+            f_output.write(
+                (b"instance: " + t.e1.encode("utf8") + b'\t' + t.e2.encode("utf8") + b'\tscore:').decode("utf-8") + str(t.confidence) + '\n'
+            )
+            f_output.write(
+                (b"sentence: " + t.sentence.encode("utf8") + b'\n').decode("utf-8")
+            )
+
             # writer patterns that extracted this tuple
             patterns = set()
             for pattern in self.candidate_tuples[t]:
